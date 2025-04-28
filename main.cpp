@@ -34,80 +34,62 @@ LINE 227
 
 TFT_eSPI tft = TFT_eSPI();
 
-#define W 240       // Width of display
-#define H 240       // Height of display
-#define R 115       // Radius
-#define R_SQR 13225 // 13225 * 13225 
-#define CENTRE 120   // Centre of the display
 
-void defScr(uint16_t); //Draws the default, variable n being how many "stop lines" it should draw
+#define W 240             // Width of display
+#define H 240             // Height of display
+#define R 115             // Radius
+#define CENTRE 120        // Centre of the display
+#define BGCOLOR TFT_BLACK // Change it to whatever bg color you want
+
+//currently unused variables, they will be used for the encoder in the future
+int16_t pos = 0;
+int16_t numOfRotations = 0;
+int16_t position = 0;
+
+// drawDefaultScr has a range from 0 to 60, 0 being a black screen.
+void drawDefaultScr(uint16_t n) { //Draws the default screen, variable n being how many "stop lines" it should draw. 
+  if (n < 0 || n > 60) {
+      Serial.println("ERROR: In function drawDefaultScr, number passed is out of range. Please choose a number from 1 to 60.");
+      return;
+  } 
+  else if (n == 0){
+    tft.fillCircle(CENTRE, CENTRE, 100, BGCOLOR);
+    return;
+  }
+  float_t rad = (2 * PI) / n; // Angle in radians for each segment
+
+  for (uint16_t i = 0; i < n; i++) {
+      float_t d = i * rad; // Current angle in radians
+      float_t tempX = round(CENTRE + cos(d) * R);  // Calculate X for the starting point of the line
+      float_t tempY = round(CENTRE + sin(d) * R);  // Calculate Y for the starting point of the line
+
+      tft.drawLine(tempX, tempY, CENTRE, CENTRE, TFT_WHITE); // Draw the line
+      
+  }
+  tft.fillCircle(CENTRE, CENTRE, 100, BGCOLOR); // "Erase" so there are only notches
+
+  //TODO: calculate the starting point so you dont have to erase the lines
+
+  return;
+}
+
+void currPos(){
+
+}
+
+void normalizedPos(){ // Normalizes variable pos into variable number of rotations * 360 + variable position.
+  numOfRotations = pos / 360;
+  position = pos % 360;
+  return;
+}
 
 void setup() {
   Serial.begin(9600);
   tft.init();
-  Serial.println("Initialised LCD");
-  tft.fillScreen(TFT_BLACK);
-  defScr(5);
+  tft.fillScreen(BGCOLOR);
+  drawDefaultScr(8); // Demonstration of drawing notches
 }
 
 void loop() {
-
-}
-
-void defScr(uint16_t n){
-  if (n < 0 && n > 40){
-    Serial.println("ERROR: In function defScr, number passed is out of range. Please choose a number from 0 to 40.");
-    return;
-  }
-
-  uint16_t deg;
-  uint16_t a;
-  uint16_t b;
-  uint16_t tempA;
-  uint16_t tempB;
-
-  tft.drawCircle(CENTRE, CENTRE, R, TFT_RED);
-
-  deg = 360 / n; // Example: 360 / 4 = Every 90 degrees there should be a line
-  Serial.println(deg);
-  /*
-    a = sin(d) * R;
-    b = sqrt(R_SQR - a*a);
-  */
-
-  uint16_t count = 0;
-  for (uint16_t d = 0; d < 360; d += deg){
-    a = sin(d) * R;
-    b = sqrt(R_SQR - a*a);
-    
-    if (d >= 0 && d <= 90){
-      tempA = 120 + a;
-      tempB = 120 - b;
-
-      tft.drawLine(tempA, tempB, CENTRE, CENTRE, TFT_WHITE);
-    }
-    else if (d >= 90 && d<= 180){
-      tempA = 120 - a;
-      tempB = 120 - b;
-
-      tft.drawLine(tempA, tempB, CENTRE, CENTRE, TFT_WHITE);
-    }
-    else if (d >= 180 && d<=270){
-      tempA = 120 - a;
-      tempB = 120 + b;
-
-      tft.drawLine(tempA, tempB, CENTRE, CENTRE, TFT_WHITE);
-    }
-    else if (d>= 270 &&d <= 360){
-      tempA = 120 + a;
-      tempB = 120 + b;
-
-      tft.drawLine(tempA, tempB, CENTRE, CENTRE, TFT_WHITE);
-    }
-
-    
-    
-  }
-
 
 }
