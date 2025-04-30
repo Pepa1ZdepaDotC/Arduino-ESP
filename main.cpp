@@ -44,7 +44,7 @@ TFT_eSPI tft = TFT_eSPI();
 //currently unused variables, they will be used for the encoder in the future
 int16_t pos = 0;
 int16_t numOfRotations = 0;
-int16_t position = 0;
+//int16_t position = 0;
 
 // drawDefaultScr has a range from 0 to 60, 0 being a black screen.
 void drawDefaultScr(uint16_t n) { //Draws the default screen, variable n being how many "stop lines" it should draw. 
@@ -53,7 +53,7 @@ void drawDefaultScr(uint16_t n) { //Draws the default screen, variable n being h
       return;
   } 
   else if (n == 0){
-    tft.fillCircle(CENTRE, CENTRE, 100, BGCOLOR);
+    tft.fillCircle(CENTRE, CENTRE, 85, BGCOLOR);
     return;
   }
   float_t rad = (2 * PI) / n; // Angle in radians for each segment
@@ -66,20 +66,27 @@ void drawDefaultScr(uint16_t n) { //Draws the default screen, variable n being h
       tft.drawLine(tempX, tempY, CENTRE, CENTRE, TFT_WHITE); // Draw the line
       
   }
-  tft.fillCircle(CENTRE, CENTRE, 100, BGCOLOR); // "Erase" so there are only notches
-
+  //tft.fillCircle(CENTRE, CENTRE, 100, BGCOLOR); // "Erase" so there are only notches
+  delay(70);
   //TODO: calculate the starting point so you dont have to erase the lines
 
   return;
 }
 
-void currPos(){
+void currPos(){ // Takes degrees, draws the position on the "ring"
+  // all of the inputs are global variables
+  // pos is the input value in degrees
+  float_t position = pos * (PI / 180);
+  float_t tempX = round(CENTRE + cos(position) * R);
+  float_t tempY = round(CENTRE + sin(position) * R);
+
+  tft.fillCircle(tempX, tempY, 5, TFT_CYAN);
 
 }
 
 void normalizedPos(){ // Normalizes variable pos into variable number of rotations * 360 + variable position.
-  numOfRotations = pos / 360;
-  position = pos % 360;
+  //numOfRotations = pos / 360;
+  //position = pos % 360;
   return;
 }
 
@@ -87,7 +94,16 @@ void setup() {
   Serial.begin(9600);
   tft.init();
   tft.fillScreen(BGCOLOR);
-  drawDefaultScr(8); // Demonstration of drawing notches
+  drawDefaultScr(60); // Demonstration of drawing notches
+  delay(500);
+  for(uint16_t i = 0; i <= 360; i+= 6){
+    //tft.fillScreen(TFT_BLACK);
+    drawDefaultScr(60);
+    pos = i + 270;
+    currPos();
+    //delay(100);
+  }
+
 }
 
 void loop() {
